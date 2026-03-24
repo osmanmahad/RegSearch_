@@ -127,6 +127,11 @@ body.dark #dm-toggle .moon{display:none}
     <div class="hbadge">REGULATORY GUIDANCE PORTAL</div>
   </div>
 </header>
+
+  <span class="api-status no" id="api-status">Not set — live search disabled</span>
+  <span class="api-help">Get a key at <a href="https://console.anthropic.com/" target="_blank" rel="noopener">console.anthropic.com</a></span>
+</div>
+
 <div class="hero">
   <h1>Regulatory Guidance<br>Document Search</h1>
   <p>Instant results appear as you type — live search runs in parallel for complete coverage.</p>
@@ -154,6 +159,11 @@ body.dark #dm-toggle .moon{display:none}
 <div class="tw"><div class="sl">Quick searches</div><div class="tg" id="tg"></div></div>
 <div id="ra"><div class="es"><div class="ei">📋</div><p>Type any keyword, topic, document number, or guidance name.<br>Cached results appear instantly as you type — press Search for full live coverage.</p></div></div>
 <script>
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// CONFIGURATION — paste your Anthropic API key below
+const ANTHROPIC_API_KEY = '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';
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 const LOCAL=[
   {agency:"FDA",title:"Drug Master Files (DMFs) — Guidance for Industry",type:"Guidance",topic:"Drug Development",date:"2023-11",pdf_filename:"drug-master-file-guidances.pdf",pdf_url:"https://www.fda.gov/media/73966/download",page_url:"https://www.fda.gov/drugs/drug-master-files-dmfs/drug-master-file-guidances",kw:["drug master file","dmf","api","drug substance"]},
   {agency:"FDA",title:"ICH Q7: Good Manufacturing Practice for Active Pharmaceutical Ingredients",type:"Guidance",topic:"GMP",date:"2016-09",pdf_filename:"ucm073497-ich-q7-gmp-api.pdf",pdf_url:"https://www.fda.gov/media/71518/download",page_url:"https://www.fda.gov/regulatory-information/search-fda-guidance-documents/q7-good-manufacturing-practice-guidance-active-pharmaceutical-ingredients",kw:["gmp","manufacturing","api","ich q7","active pharmaceutical ingredient"]},
@@ -315,7 +325,9 @@ Rules:
 - YOUR ENTIRE RESPONSE = ONE JSON OBJECT, NOTHING ELSE`;
 
   try{
-    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:4000,system:sp,tools:[{type:'web_search_20250305',name:'web_search'}],messages:[{role:'user',content:`Query: "${raw}"\nAgencies: ${ags.join(', ')}`}]})});
+    const apiKey=ANTHROPIC_API_KEY;
+    if(!apiKey||apiKey==='YOUR_API_KEY_HERE')throw new Error('NO_KEY');
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:4000,system:sp,tools:[{type:'web_search_20250305',name:'web_search'}],messages:[{role:'user',content:`Query: "${raw}"\nAgencies: ${ags.join(', ')}`}]})});
     if(!r.ok){const e=await r.text();throw new Error('API '+r.status+': '+e.slice(0,200));}
     const data=await r.json();
     // Collect ALL text blocks (web_search produces multiple content blocks)
@@ -352,8 +364,11 @@ Rules:
       `<div class="bn done">✓ ${mt} document${mt!==1?'s':''} total <span style="opacity:.7;font-weight:400;margin-left:4px">— ${lt} cached + ${extra} new from live search</span></div>`);
   }catch(err){
     console.error(err);
-    ra().innerHTML=renderGroups(lg,raw,'No cached results. Live search unavailable — try again.',
-      `<div class="bn partial">⚠ Showing ${lt} cached result${lt!==1?'s':''} — live search unavailable right now.</div>`);
+    const noKey=err.message==='NO_KEY';
+    const msg=noKey
+      ? `<div class="bn partial">🔑 API key not configured. Open index.html and paste your key into the ANTHROPIC_API_KEY variable at the top of the script. Showing ${lt} cached result${lt!==1?'s':''} below.</div>`
+      : `<div class="bn partial">⚠ Showing ${lt} cached result${lt!==1?'s':''} — live search unavailable right now.</div>`;
+    ra().innerHTML=renderGroups(lg,raw,'No cached results.',msg);
   }finally{setBtn(false);}
 }
 
@@ -402,3 +417,4 @@ footer{border-top:1.5px solid var(--border);margin-top:2rem;padding:1.25rem 2rem
 </style>
 </body>
 </html>
+
