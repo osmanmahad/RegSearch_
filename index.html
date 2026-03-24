@@ -1682,6 +1682,37 @@
         },
       ];
 
+      // ── User cache (persisted to localStorage) ────────────────────────────────
+      function loadUserCache() {
+        try {
+          const raw = localStorage.getItem("regsearch-cache");
+          return raw ? JSON.parse(raw) : [];
+        } catch {
+          return [];
+        }
+      }
+
+      function saveToUserCache(newDocs) {
+        try {
+          const existing = loadUserCache();
+          const existingTitles = new Set(
+            existing.map((d) => d.title.toLowerCase()),
+          );
+          const toAdd = newDocs.filter(
+            (d) => d.title && !existingTitles.has(d.title.toLowerCase()),
+          );
+          if (!toAdd.length) return;
+          const updated = [...existing, ...toAdd].slice(-500); // keep last 500 docs max
+          localStorage.setItem("regsearch-cache", JSON.stringify(updated));
+        } catch (e) {
+          console.warn("Cache save failed:", e);
+        }
+      }
+
+      function getAllDocs() {
+        return [...LOCAL, ...loadUserCache()];
+      }
+
       const AGM = {
         FDA: { flag: "🇺🇸", full: "U.S. Food & Drug Administration", bc: "bf" },
         HC: { flag: "🇨🇦", full: "Health Canada", bc: "bh" },
@@ -1710,7 +1741,8 @@
       }
 
       function localSearch(q, ags) {
-        const hits = LOCAL.filter((d) => ags.includes(d.agency))
+        const hits = getAllDocs()
+          .filter((d) => ags.includes(d.agency))
           .map((d) => ({ d, s: scoreDoc(d, q) }))
           .filter((r) => r.s > 0)
           .sort((a, b) => b.s - a.s)
@@ -1814,33 +1846,12 @@
         );
 
         // Step 2: live search
-        const sp = `You are a regulatory affairs expert assistant. Use web_search to find real guidance documents.
-TASK: Find guidance documents for the user query from these agencies ONLY: ${ags.join(", ")}
-Do NOT include these already-found documents: ${JSON.stringify(
-          Object.values(lg)
-            .flat()
-            .map((d) => d.title),
-        )}
-
-CRITICAL OUTPUT RULE: Your ENTIRE final response must be ONE valid JSON object and nothing else.
-No introduction, no explanation, no markdown fences. Start with { and end with }.
-
-JSON shape:
-{
-  "FDA": [ { "agency":"FDA", "title":"exact title", "type":"Guidance|Draft Guidance|Guideline etc", "topic":"short topic", "date":"YYYY-MM", "pdf_filename":"filename.pdf or null", "pdf_url":"https://direct-link.pdf or null", "page_url":"https://official-page-url" } ],
-  "HC": [...],
-  "EMA": [...],
-  "ICH": [...],
-  "WHO": [...]
-}
-
-Rules:
-- Only include agency keys that have results
-- 2-5 real documents per agency max
-- page_url is required — must be a real URL from fda.gov, canada.ca, ema.europa.eu, ich.org, or who.int
-- pdf_url must end in .pdf — set null if unsure
-- Do NOT fabricate documents
-- YOUR ENTIRE RESPONSE = ONE JSON OBJECT, NOTHING ELSE`;
+        const sp = `You are a regulatory affairs expert. Find real guidance documents for the query.
+Agencies: ${ags.join(", ")} only.
+Return ONE valid JSON object, nothing else. No markdown, no explanation.
+Format: {"FDA":[...],"HC":[...],"EMA":[...],"ICH":[...],"WHO":[...]}
+Each doc: {"agency":"FDA","title":"...","type":"...","topic":"...","date":"YYYY-MM","pdf_filename":"....pdf or null","pdf_url":"direct .pdf url or null","page_url":"official url"}
+Rules: 3-5 real docs per agency, only include agencies with results, page_url required, no fabrications.`;
 
         try {
           if (!PROXY_URL || PROXY_URL === "YOUR_WORKER_URL_HERE")
@@ -1850,7 +1861,7 @@ Rules:
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               model: "claude-sonnet-4-20250514",
-              max_tokens: 4000,
+              max_tokens: 2000,
               system: sp,
               tools: [{ type: "web_search_20250305", name: "web_search" }],
               messages: [
@@ -1902,19 +1913,27 @@ Rules:
               .map((d) => d.title.toLowerCase()),
           );
           const merged = { ...lg };
+          const newLiveDocs = [];
           ags.forEach((ag) => {
             const add = (ai[ag] || [])
               .filter((d) => !lt2.has(d.title?.toLowerCase()))
               .map((d) => ({ ...d, agency: ag }));
-            if (add.length) merged[ag] = [...(merged[ag] || []), ...add];
+            if (add.length) {
+              merged[ag] = [...(merged[ag] || []), ...add];
+              newLiveDocs.push(...add);
+            }
           });
+          if (newLiveDocs.length) saveToUserCache(newLiveDocs);
           const mt = Object.values(merged).reduce((s, a) => s + a.length, 0);
           const extra = mt - lt;
+          const cacheNote = newLiveDocs.length
+            ? ` · ${newLiveDocs.length} saved to cache`
+            : "";
           ra().innerHTML = renderGroups(
             merged,
             raw,
             "No documents found.",
-            `<div class="bn done">✓ ${mt} document${mt !== 1 ? "s" : ""} total <span style="opacity:.7;font-weight:400;margin-left:4px">— ${lt} cached + ${extra} new from live search</span></div>`,
+            `<div class="bn done">✓ ${mt} document${mt !== 1 ? "s" : ""} total <span style="opacity:.7;font-weight:400;margin-left:4px">— ${lt} cached + ${extra} new from live search${cacheNote}</span></div>`,
           );
         } catch (err) {
           console.error("Live search error:", err);
