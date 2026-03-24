@@ -160,9 +160,14 @@ body.dark #dm-toggle .moon{display:none}
 <div id="ra"><div class="es"><div class="ei">📋</div><p>Type any keyword, topic, document number, or guidance name.<br>Cached results appear instantly as you type — press Search for full live coverage.</p></div></div>
 <script>
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<<<<<<< HEAD
 // CONFIGURATION — paste your Cloudflare Worker URL below
 // e.g. 'https://regsearch-proxy.your-name.workers.dev'
 const PROXY_URL = 'YOUR_WORKER_URL_HERE';
+=======
+// CONFIGURATION — paste your Anthropic API key below
+const ANTHROPIC_API_KEY = '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';
+>>>>>>> 230f8a98b23a7568d5fe78585ecc010d98f6b2e8
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 const LOCAL=[
@@ -326,8 +331,14 @@ Rules:
 - YOUR ENTIRE RESPONSE = ONE JSON OBJECT, NOTHING ELSE`;
 
   try{
+<<<<<<< HEAD
     if(!PROXY_URL||PROXY_URL==='YOUR_WORKER_URL_HERE')throw new Error('NO_KEY');
     const r=await fetch(PROXY_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:4000,system:sp,tools:[{type:'web_search_20250305',name:'web_search'}],messages:[{role:'user',content:`Query: "${raw}"\nAgencies: ${ags.join(', ')}`}]})});
+=======
+    const apiKey=ANTHROPIC_API_KEY;
+    if(!apiKey||apiKey==='YOUR_API_KEY_HERE')throw new Error('NO_KEY');
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:4000,system:sp,tools:[{type:'web_search_20250305',name:'web_search'}],messages:[{role:'user',content:`Query: "${raw}"\nAgencies: ${ags.join(', ')}`}]})});
+>>>>>>> 230f8a98b23a7568d5fe78585ecc010d98f6b2e8
     if(!r.ok){const e=await r.text();throw new Error('API '+r.status+': '+e.slice(0,200));}
     const data=await r.json();
     // Collect ALL text blocks (web_search produces multiple content blocks)
@@ -366,7 +377,11 @@ Rules:
     console.error(err);
     const noKey=err.message==='NO_KEY';
     const msg=noKey
+<<<<<<< HEAD
       ? `<div class="bn partial">🔑 Proxy not configured. Open index.html and paste your Cloudflare Worker URL into the PROXY_URL variable at the top of the script. Showing ${lt} cached result${lt!==1?'s':''} below.</div>`
+=======
+      ? `<div class="bn partial">🔑 API key not configured. Open index.html and paste your key into the ANTHROPIC_API_KEY variable at the top of the script. Showing ${lt} cached result${lt!==1?'s':''} below.</div>`
+>>>>>>> 230f8a98b23a7568d5fe78585ecc010d98f6b2e8
       : `<div class="bn partial">⚠ Showing ${lt} cached result${lt!==1?'s':''} — live search unavailable right now.</div>`;
     ra().innerHTML=renderGroups(lg,raw,'No cached results.',msg);
   }finally{setBtn(false);}
@@ -417,3 +432,4 @@ footer{border-top:1.5px solid var(--border);margin-top:2rem;padding:1.25rem 2rem
 </style>
 </body>
 </html>
+
