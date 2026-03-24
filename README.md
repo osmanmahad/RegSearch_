@@ -66,7 +66,53 @@ The portal includes a built-in database of ~45 curated guidance documents with v
 ### Live search
 When you press **Search** or **Enter**, a live search is triggered that finds additional documents beyond the cached list. Results are merged with the cached results and displayed together, with cached results labelled `cached` and live results labelled `✦ live`.
 
-If the live search is unavailable, the portal falls back gracefully to the cached results with a warning banner.
+Live search uses a **Cloudflare Worker proxy** to keep your API key safe — it never appears in the browser or your public GitHub repo.
+
+### Step 1 — Get an Anthropic API key
+
+1. Go to [console.anthropic.com](https://console.anthropic.com/) and create an account
+2. Generate an API key (starts with `sk-ant-…`)
+3. Recommended: set a monthly spend cap at [console.anthropic.com/settings/limits](https://console.anthropic.com/settings/limits)
+
+### Step 2 — Deploy the Cloudflare Worker proxy
+
+1. Sign up for a free account at [cloudflare.com](https://cloudflare.com)
+2. Install the Wrangler CLI:
+   ```bash
+   npm install -g wrangler
+   wrangler login
+   ```
+3. From the `regsearch/` folder, deploy the worker:
+   ```bash
+   wrangler deploy worker.js --name regsearch-proxy --compatibility-date 2024-01-01
+   ```
+4. Add your Anthropic API key as a secret (it stays on Cloudflare's servers, never in your code):
+   ```bash
+   wrangler secret put ANTHROPIC_API_KEY
+   # paste your sk-ant-... key when prompted
+   ```
+5. Copy your Worker URL — it will look like:
+   `https://regsearch-proxy.YOUR-NAME.workers.dev`
+
+**Alternative (no CLI):** You can also create and deploy the Worker entirely through the [Cloudflare dashboard](https://dash.cloudflare.com) → Workers & Pages → Create → paste the contents of `worker.js` → add the `ANTHROPIC_API_KEY` environment variable under Settings → Variables.
+
+### Step 3 — Connect the portal to your Worker
+
+Open `index.html` and find this line near the top of the `<script>` section:
+
+```js
+const PROXY_URL = 'YOUR_WORKER_URL_HERE';
+```
+
+Replace `YOUR_WORKER_URL_HERE` with your Worker URL:
+
+```js
+const PROXY_URL = 'https://regsearch-proxy.your-name.workers.dev';
+```
+
+Save the file and push to GitHub. Live search will now work for all visitors — your API key stays hidden on Cloudflare.
+
+If no proxy URL is configured, the portal falls back gracefully to the cached results.
 
 ---
 
