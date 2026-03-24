@@ -2,7 +2,7 @@
 
 A fast, searchable portal for regulatory guidance documents from the **FDA**, **Health Canada**, **EMA**, **ICH**, and **WHO**. Built as a single-file web app — no server, no dependencies, no build step required.
 
-**Live demo:** *https://osmanmahad.github.io/RegSearch_/*
+**Live demo:** *(deploy to GitHub Pages and add your link here)*
 
 ---
 
@@ -31,7 +31,6 @@ A fast, searchable portal for regulatory guidance documents from the **FDA**, **
 
 ---
 
-<<<<<<< HEAD
 ## Getting Started
 
 ### Option 1 — Open locally
@@ -181,8 +180,6 @@ All colours are defined as CSS variables in the `:root` block at the top of the 
 
 ---
 
-=======
->>>>>>> 230f8a98b23a7568d5fe78585ecc010d98f6b2e8
 ## Built By
 
 **Mahad Osman** — [LinkedIn](https://www.linkedin.com/in/osmanmahad/)
