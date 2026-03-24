@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>RegSearch — Regulatory Guidance Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f5f4f0;--surface:#fff;--border:#e0ddd6;--text:#1a1a18;--muted:#7a7970;--accent:#1a4a8a;--accent-light:#e8eef8;--fda:#c0392b;--fda-bg:#fdf0ef;--fda-mid:#f0c4c0;--hc:#b5321a;--hc-bg:#fff2ed;--hc-mid:#ffc9ad;--ema:#0f5fa8;--ema-bg:#eaf2fc;--ema-mid:#b0cef0;--ich:#6b3fa0;--ich-bg:#f4effe;--ich-mid:#ccb0f0;--who:#107a4a;--who-bg:#eaf7f0;--who-mid:#9dd6bc;--toggle-bg:#e8e6e0;--mark-bg:#fff0b3}
+body.dark{--bg:#0f1117;--surface:#1a1d27;--border:#2a2d3a;--text:#e8eaf0;--muted:#6b7080;--accent:#5b8fd4;--accent-light:#1a2540;--fda:#e06050;--fda-bg:#2a1a18;--fda-mid:#4a2820;--hc:#d46040;--hc-bg:#2a1e15;--hc-mid:#4a2e1a;--ema:#4a8fd4;--ema-bg:#131e30;--ema-mid:#1e3050;--ich:#9a70d4;--ich-bg:#1e1530;--ich-mid:#352050;--who:#40a870;--who-bg:#122018;--who-mid:#1e3828;--toggle-bg:#2a2d3a;--mark-bg:#3a3010}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+header{background:var(--text);color:#fff;padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:62px;position:sticky;top:0;z-index:200;box-shadow:0 2px 12px rgba(0,0,0,.18)}
+.logo{font-family:'DM Serif Display',serif;font-size:1.45rem;letter-spacing:-.02em}.logo span{color:#aac4e8;font-style:italic}
+.hbadge{font-family:'DM Mono',monospace;font-size:.62rem;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);padding:3px 10px;border-radius:20px;letter-spacing:.05em;color:#ccc}
+.hero{max-width:880px;margin:0 auto;padding:3rem 2rem 2rem}
+.hero h1{font-family:'DM Serif Display',serif;font-size:clamp(1.9rem,4vw,2.8rem);line-height:1.15;letter-spacing:-.03em;margin-bottom:.4rem}
+.hero p{color:var(--muted);font-size:.95rem;font-weight:300;margin-bottom:2rem}
+.sc{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:1.4rem;box-shadow:0 2px 20px rgba(0,0,0,.06);margin-bottom:1.5rem}
+.sr{display:flex;gap:.6rem;margin-bottom:1rem}
+.sw{flex:1;position:relative}
+.sw svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none}
+#si{width:100%;padding:.85rem 1rem .85rem 2.6rem;font-family:'DM Sans',sans-serif;font-size:.97rem;border:1.5px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);outline:none;transition:border-color .2s}
+#si:focus{border-color:var(--accent);background:#fff}
+#sb{padding:.85rem 1.5rem;background:var(--accent);color:#fff;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.9rem;font-weight:600;cursor:pointer;white-space:nowrap;transition:background .2s,transform .1s;display:flex;align-items:center;gap:6px}
+#sb:hover{background:#163d75}#sb:active{transform:scale(.98)}#sb:disabled{background:#8aa;cursor:not-allowed}
+.frow{display:flex;flex-wrap:wrap;gap:.45rem;align-items:center}
+.fl{font-size:.72rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-right:.2rem}
+.chip{padding:4px 13px;border-radius:20px;font-size:.78rem;font-weight:500;cursor:pointer;border:1.5px solid var(--border);background:var(--surface);color:var(--muted);transition:all .15s;user-select:none}
+.chip:hover{border-color:#aaa;color:var(--text)}
+.chip.on[data-a=FDA]{background:var(--fda);border-color:var(--fda);color:#fff}
+.chip.on[data-a=HC]{background:var(--hc);border-color:var(--hc);color:#fff}
+.chip.on[data-a=EMA]{background:var(--ema);border-color:var(--ema);color:#fff}
+.chip.on[data-a=ICH]{background:var(--ich);border-color:var(--ich);color:#fff}
+.chip.on[data-a=WHO]{background:var(--who);border-color:var(--who);color:#fff}
+.tw{max-width:880px;margin:0 auto;padding:0 2rem 1.5rem}
+.sl{font-size:.7rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.55rem}
+.tg{display:flex;flex-wrap:wrap;gap:.4rem}
+.tt{font-size:.74rem;padding:4px 11px;border-radius:5px;background:var(--accent-light);color:var(--accent);cursor:pointer;font-family:'DM Mono',monospace;border:1px solid #c4d8f0;transition:background .15s}
+.tt:hover{background:#d0dff5}
+#ra{max-width:880px;margin:0 auto;padding:0 2rem 4rem}
+.bn{display:flex;align-items:center;gap:.6rem;padding:.65rem 1rem;border-radius:8px;margin-bottom:.85rem;font-size:.82rem;font-weight:500}
+.bn.loading{background:#eef3fa;color:var(--accent);border:1px solid #c8d8f0}
+.bn.done{background:#efffef;color:#1a6a2a;border:1px solid #b0dbb0}
+.bn.partial{background:#fffbea;color:#7a5800;border:1px solid #f0dc90}
+.bn.err{background:#fff0ef;color:var(--fda);border:1px solid var(--fda-mid)}
+.sp{width:15px;height:15px;border-radius:50%;border:2px solid #c8d8f0;border-top-color:var(--accent);animation:spin .7s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ag{margin-bottom:2rem}
+.gh{display:flex;align-items:center;gap:.7rem;padding-bottom:.5rem;border-bottom:1.5px solid var(--border);margin-bottom:.8rem}
+.gb{font-family:'DM Mono',monospace;font-size:.68rem;padding:2px 9px;border-radius:4px;letter-spacing:.04em;font-weight:500}
+.bf{background:var(--fda-bg);color:var(--fda);border:1px solid var(--fda-mid)}
+.bh{background:var(--hc-bg);color:var(--hc);border:1px solid var(--hc-mid)}
+.be{background:var(--ema-bg);color:var(--ema);border:1px solid var(--ema-mid)}
+.bi{background:var(--ich-bg);color:var(--ich);border:1px solid var(--ich-mid)}
+.bw{background:var(--who-bg);color:var(--who);border:1px solid var(--who-mid)}
+.gn{font-family:'DM Serif Display',serif;font-size:1rem}
+.gc{margin-left:auto;font-family:'DM Mono',monospace;font-size:.72rem;color:var(--muted)}
+.dc{background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:.9rem 1.1rem;margin-bottom:.5rem;display:flex;align-items:flex-start;gap:.85rem;transition:border-color .15s,box-shadow .15s;animation:fu .18s ease both}
+.dc:hover{box-shadow:0 2px 14px rgba(0,0,0,.07);border-color:#bbc8dc}
+@keyframes fu{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.df{font-size:1.2rem;flex-shrink:0;margin-top:2px}
+.db{flex:1;min-width:0}
+.dt{font-size:.87rem;font-weight:500;line-height:1.4;margin-bottom:.28rem;color:var(--text)}
+.dfn{display:inline-flex;align-items:center;gap:4px;font-family:'DM Mono',monospace;font-size:.67rem;color:#b03a2e;background:#fff5f5;border:1px solid #f5c6c4;border-radius:3px;padding:2px 7px;margin-bottom:.3rem;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dm{display:flex;flex-wrap:wrap;gap:.4rem;align-items:center}
+.dty{font-family:'DM Mono',monospace;font-size:.67rem;color:var(--muted);background:var(--bg);padding:2px 7px;border-radius:3px}
+.dtp{font-size:.72rem;color:var(--muted)}
+.dd{font-family:'DM Mono',monospace;font-size:.67rem;color:var(--muted);margin-left:auto}
+.dloc{font-size:.62rem;font-family:'DM Mono',monospace;background:#f0f4ff;color:#3a5fa8;border:1px solid #c8d4f0;border-radius:3px;padding:1px 6px;margin-left:4px}
+.dai{font-size:.62rem;font-family:'DM Mono',monospace;background:#f4effe;color:var(--ich);border:1px solid var(--ich-mid);border-radius:3px;padding:1px 6px;margin-left:4px}
+.da{display:flex;flex-direction:column;gap:.32rem;flex-shrink:0}
+.bp,.bpdf{display:inline-flex;align-items:center;gap:4px;padding:5px 10px;border-radius:6px;font-size:.73rem;font-weight:500;text-decoration:none;transition:all .15s;white-space:nowrap;border:1.5px solid;font-family:'DM Sans',sans-serif}
+.bp{background:var(--accent-light);border-color:#c0d0ea;color:var(--accent)}
+.bp:hover{background:#d4e3f5;border-color:var(--accent)}
+.bpdf{background:var(--fda-bg);border-color:var(--fda-mid);color:var(--fda)}
+.bpdf:hover{background:#fce0de;border-color:var(--fda)}
+.durl{display:flex;align-items:center;gap:5px;margin-top:.35rem;padding:.3rem .55rem;background:var(--bg);border:1px solid var(--border);border-radius:5px;overflow:hidden;max-width:100%}
+.durl-label{font-family:'DM Mono',monospace;font-size:.58rem;color:var(--muted);white-space:nowrap;flex-shrink:0;text-transform:uppercase;letter-spacing:.04em;background:#e8e6e0;border-radius:3px;padding:1px 5px}
+.durl-page{font-family:'DM Mono',monospace;font-size:.62rem;color:var(--accent);text-decoration:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0}
+.durl-page:hover{text-decoration:underline}
+.dcopy{flex-shrink:0;background:none;border:1px solid var(--border);cursor:pointer;color:var(--muted);padding:2px 6px;border-radius:3px;transition:all .15s;font-size:.65rem;font-family:'DM Mono',monospace;line-height:1.4}
+.dcopy:hover{color:var(--accent);border-color:var(--accent);background:var(--accent-light)}
+.es{text-align:center;padding:3.5rem 1rem;color:var(--muted)}
+.ei{font-size:2.5rem;margin-bottom:1rem;opacity:.35}
+.es p{font-size:.88rem;line-height:1.6}
+mark{background:var(--mark-bg);color:inherit;border-radius:2px;padding:0 2px}
+body{transition:background .25s,color .25s}
+.dc,.sc,.durl,.dcopy,.bn{transition:background .25s,border-color .25s,color .25s}
+body.dark .dc:hover{box-shadow:0 2px 14px rgba(0,0,0,.4)}
+body.dark #si:focus{background:var(--surface)}
+body.dark .bn.loading{background:#0f1e30;color:var(--accent);border-color:#1e3050}
+body.dark .bn.done{background:#0f1e15;color:#50c870;border-color:#1e3828}
+body.dark .bn.partial{background:#1e1a08;color:#c8a840;border-color:#3a3010}
+body.dark .durl-label{background:#2a2d3a;color:var(--muted)}
+body.dark .dfn{background:#2a1a18;border-color:var(--fda-mid);color:#e08070}
+body.dark .dloc{background:#1a2030;color:#7090c0;border-color:#2a3550}
+body.dark .dai{background:#1e1530;color:#9a70d4;border-color:#352050}
+body.dark .bp{background:var(--accent-light);border-color:#253550;color:var(--accent)}
+body.dark .bp:hover{background:#1e2d48;border-color:var(--accent)}
+body.dark .bpdf{background:var(--fda-bg);border-color:var(--fda-mid);color:var(--fda)}
+body.dark .bpdf:hover{background:#3a1e18;border-color:var(--fda)}
+body.dark .tt{background:#1a2030;border-color:#253040;color:#7090c0}
+body.dark .tt:hover{background:#1e2840}
+body.dark .chip{background:var(--surface);border-color:var(--border);color:var(--muted)}
+body.dark header{background:#0a0d14;box-shadow:0 2px 12px rgba(0,0,0,.5)}
+body.dark .sc{box-shadow:0 2px 20px rgba(0,0,0,.3)}
+/* dark toggle button */
+#dm-toggle{display:flex;align-items:center;gap:7px;background:none;border:1.5px solid rgba(255,255,255,.18);border-radius:20px;padding:5px 12px;cursor:pointer;color:rgba(255,255,255,.8);font-family:'DM Sans',sans-serif;font-size:.75rem;font-weight:500;transition:all .15s;white-space:nowrap}
+#dm-toggle:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.3)}
+#dm-toggle .sun{display:none}
+#dm-toggle .moon{display:block}
+body.dark #dm-toggle .sun{display:block}
+body.dark #dm-toggle .moon{display:none}
+@media(max-width:600px){.hero,.tw,#ra{padding-left:1rem;padding-right:1rem}.hero{padding-top:2rem}.sr{flex-direction:column}.da{flex-direction:row}.dd{display:none}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">Reg<span>Search</span></div>
+  <div style="display:flex;align-items:center;gap:.75rem">
+    <button id="dm-toggle" onclick="toggleDark()" title="Toggle dark mode">
+      <span class="sun"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg> Light</span>
+      <span class="moon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg> Dark</span>
+    </button>
+    <div class="hbadge">REGULATORY GUIDANCE PORTAL</div>
+  </div>
+</header>
+<div class="hero">
+  <h1>Regulatory Guidance<br>Document Search</h1>
+  <p>Instant results appear as you type — live search runs in parallel for complete coverage.</p>
+  <div class="sc">
+    <div class="sr">
+      <div class="sw">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input id="si" type="text" placeholder="e.g. GMP, pharmacovigilance, GUI-0100, biosimilar, ICH Q7…" autocomplete="off"/>
+      </div>
+      <button id="sb">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        Search
+      </button>
+    </div>
+    <div class="frow">
+      <span class="fl">Agencies:</span>
+      <span class="chip on" data-a="FDA">🇺🇸 FDA</span>
+      <span class="chip on" data-a="HC">🇨🇦 Health Canada</span>
+      <span class="chip on" data-a="EMA">🇪🇺 EMA</span>
+      <span class="chip on" data-a="ICH">🌐 ICH</span>
+      <span class="chip" data-a="WHO">🌍 WHO</span>
+    </div>
+  </div>
+</div>
+<div class="tw"><div class="sl">Quick searches</div><div class="tg" id="tg"></div></div>
+<div id="ra"><div class="es"><div class="ei">📋</div><p>Type any keyword, topic, document number, or guidance name.<br>Cached results appear instantly as you type — press Search for full live coverage.</p></div></div>
+<script>
+const LOCAL=[
+  {agency:"FDA",title:"Drug Master Files (DMFs) — Guidance for Industry",type:"Guidance",topic:"Drug Development",date:"2023-11",pdf_filename:"drug-master-file-guidances.pdf",pdf_url:"https://www.fda.gov/media/73966/download",page_url:"https://www.fda.gov/drugs/drug-master-files-dmfs/drug-master-file-guidances",kw:["drug master file","dmf","api","drug substance"]},
+  {agency:"FDA",title:"ICH Q7: Good Manufacturing Practice for Active Pharmaceutical Ingredients",type:"Guidance",topic:"GMP",date:"2016-09",pdf_filename:"ucm073497-ich-q7-gmp-api.pdf",pdf_url:"https://www.fda.gov/media/71518/download",page_url:"https://www.fda.gov/regulatory-information/search-fda-guidance-documents/q7-good-manufacturing-practice-guidance-active-pharmaceutical-ingredients",kw:["gmp","manufacturing","api","ich q7","active pharmaceutical ingredient"]},
+  {agency:"FDA",title:"Bioanalytical Method Validation: Guidance for Industry",type:"Guidance",topic:"Bioanalysis",date:"2018-05",pdf_filename:"bioanalytical-method-validation-guidance-industry.pdf",pdf_url:"https://www.fda.gov/media/70858/download",page_url:"https://www.fda.gov/regulatory-information/search-fda-guidance-documents/bioanalytical-method-validation-guidance-industry",kw:["bioanalytical","method validation","pharmacokinetics","pk"]},
+  {agency:"FDA",title:"Biosimilar Product Development and the FDA Approval Process",type:"Guidance",topic:"Biosimilars",date:"2021-06",pdf_filename:"biosimilar-product-development-fda-approval-process.pdf",pdf_url:"https://www.fda.gov/media/82647/download",page_url:"https://www.fda.gov/drugs/guidance-documents-related-drugs/biosimilars-guidances",kw:["biosimilar","biologic","351k","similar biologic"]},
+  {agency:"FDA",title:"E6(R2) Good Clinical Practice: Integrated Addendum",type:"Guidance",topic:"Clinical Trials",date:"2018-03",pdf_filename:"e6r2-good-clinical-practice-integrated-addendum.pdf",pdf_url:"https://www.fda.gov/media/93884/download",page_url:"https://www.fda.gov/regulatory-information/search-fda-guidance-documents/e6r2-good-clinical-practice-integrated-addendum-ich-e6r1",kw:["gcp","clinical trials","ich e6","good clinical practice"]},
+  {agency:"FDA",title:"BCS-Based Biowaiver: Waiver of In Vivo Bioavailability and Bioequivalence Studies",type:"Guidance",topic:"Bioequivalence",date:"2017-12",pdf_filename:"bcs-based-biowaiver.pdf",pdf_url:"https://www.fda.gov/media/70936/download",page_url:"https://www.fda.gov/regulatory-information/search-fda-guidance-documents/waiver-vivo-bioavailability-and-bioequivalence-studies-immediate-release-solid-oral-dosage-forms",kw:["bioequivalence","bcs","biowaiver","oral dosage","biopharmaceutics"]},
+  {agency:"FDA",title:"Labeling Recommendations for Prescription Drugs",type:"Guidance",topic:"Labeling",date:"2020-04",pdf_filename:"labeling-recommendations-prescription-drugs.pdf",pdf_url:"https://www.fda.gov/media/71836/download",page_url:"https://www.fda.gov/regulatory-information/search-fda-guidance-documents/labeling-recommendations-prescription-drugs",kw:["labeling","prescription","package insert","pi"]},
+  {agency:"FDA",title:"Post-marketing Pharmacovigilance and Pharmacoepidemiology Studies",type:"Guidance",topic:"Pharmacovigilance",date:"2021-09",pdf_filename:"post-marketing-pharmacovigilance.pdf",pdf_url:"https://www.fda.gov/media/152372/download",page_url:"https://www.fda.gov/regulatory-information/search-fda-guidance-documents",kw:["pharmacovigilance","safety","post-marketing","adverse events","faers"]},
+  {agency:"FDA",title:"Expedited Programs for Serious Conditions — Drugs and Biologics",type:"Guidance",topic:"Drug Approval",date:"2014-05",pdf_filename:"expedited-programs-serious-conditions-drugs-biologics.pdf",pdf_url:"https://www.fda.gov/media/86377/download",page_url:"https://www.fda.gov/regulatory-information/search-fda-guidance-documents/expedited-programs-serious-conditions-drugs-and-biologics",kw:["breakthrough therapy","fast track","accelerated approval","priority review","drug approval"]},
+  {agency:"FDA",title:"ICH Q3D(R1): Elemental Impurities",type:"Guidance",topic:"Drug Development",date:"2020-03",pdf_filename:"q3d-r1-elemental-impurities.pdf",pdf_url:"https://www.fda.gov/media/135956/download",page_url:"https://www.fda.gov/regulatory-information/search-fda-guidance-documents/q3d-r1-elemental-impurities",kw:["elemental impurities","ich q3d","heavy metals","q3d"]},
+  {agency:"FDA",title:"M4: Common Technical Document (CTD) for Registration of Pharmaceuticals",type:"Guidance",topic:"Drug Approval",date:"2017-08",pdf_filename:"m4-common-technical-document.pdf",pdf_url:"https://www.fda.gov/media/71505/download",page_url:"https://www.fda.gov/regulatory-information/search-fda-guidance-documents",kw:["ctd","common technical document","ich m4","nda","bla","registration"]},
+  {agency:"FDA",title:"General Considerations for Pediatric Pharmacokinetic Studies",type:"Guidance",topic:"Pediatric",date:"2022-03",pdf_filename:"general-considerations-pediatric-pharmacokinetic.pdf",pdf_url:"https://www.fda.gov/media/156543/download",page_url:"https://www.fda.gov/regulatory-information/search-fda-guidance-documents",kw:["pediatric","children","prea","pharmacokinetic","age group"]},
+  {agency:"FDA",title:"IND Applications for Phase 2 and Phase 3 Studies — CMC",type:"Guidance",topic:"Clinical Trials",date:"2003-05",pdf_filename:"ind-applications-phase2-phase3-cmc.pdf",pdf_url:"https://www.fda.gov/media/72666/download",page_url:"https://www.fda.gov/regulatory-information/search-fda-guidance-documents/ind-applications-phase-2-and-phase-3-studies-chemistry-manufacturing-and-controls-information",kw:["ind","phase 2","phase 3","investigational new drug","cmc"]},
+  {agency:"FDA",title:"Process Validation: General Principles and Practices",type:"Guidance",topic:"GMP",date:"2011-01",pdf_filename:"process-validation-general-principles-practices.pdf",pdf_url:"https://www.fda.gov/files/drugs/published/Process-Validation--General-Principles-and-Practices.pdf",page_url:"https://www.fda.gov/regulatory-information/search-fda-guidance-documents/process-validation-general-principles-and-practices",kw:["process validation","gmp","manufacturing","quality","ppq"]},
+  {agency:"FDA",title:"Sterile Drug Products Produced by Aseptic Processing — cGMP",type:"Guidance",topic:"GMP",date:"2004-09",pdf_filename:"sterile-drug-products-aseptic-processing-cgmp.pdf",pdf_url:"https://www.fda.gov/media/71026/download",page_url:"https://www.fda.gov/regulatory-information/search-fda-guidance-documents/sterile-drug-products-produced-aseptic-processing-current-good-manufacturing-practice",kw:["aseptic","sterile","cgmp","gmp","manufacturing","contamination"]},
+  {agency:"FDA",title:"Adaptive Designs for Clinical Trials of Drugs and Biologics",type:"Guidance",topic:"Clinical Trials",date:"2019-11",pdf_filename:"adaptive-designs-clinical-trials-drugs-biologics.pdf",pdf_url:"https://www.fda.gov/media/78495/download",page_url:"https://www.fda.gov/regulatory-information/search-fda-guidance-documents/adaptive-designs-clinical-trials-drugs-and-biologics",kw:["adaptive design","clinical trial","seamless","dose finding"]},
+  {agency:"HC",title:"Management of Drug Submissions and Applications — GUI-0008",type:"Guidance",topic:"Drug Approval",date:"2023-01",pdf_filename:"management-drug-submissions-applications-gui-0008.pdf",pdf_url:"https://www.canada.ca/content/dam/hc-sc/documents/services/drugs-health-products/drug-products/applications-submissions/guidance-documents/management-drug-submissions/management-drug-submissions-applications.pdf",page_url:"https://www.canada.ca/en/health-canada/services/drugs-health-products/drug-products/applications-submissions/guidance-documents/management-drug-submissions-applications.html",kw:["drug submission","nds","ands","sands","canada","gui-0008","management"]},
+  {agency:"HC",title:"Administrative Processing of Submissions and Applications Involving Human or Disinfectant Drugs",type:"Guidance",topic:"Drug Submissions",date:"2020-01",pdf_filename:"guidance-document-administrative-processing-human-disinfectant-drugs.pdf",pdf_url:"https://www.canada.ca/content/dam/hc-sc/documents/services/drugs-health-products/drug-products/applications-submissions/guidance-documents/guidance-document-administrative-processing-human-disinfectant-drugs.pdf",page_url:"https://www.canada.ca/en/health-canada/services/drugs-health-products/drug-products/applications-submissions/guidance-documents/administrative-processing-human-disinfectant-drugs-2019/document.html",kw:["administrative processing","disinfectant","human drugs","din","noc","cmpn","cross-licensed","manufacturer name","osip"]},
+  {agency:"HC",title:"Quality (Chemistry and Manufacturing) Guidance for New Drug Submissions — NDS/ANDS",type:"Guidance",topic:"Drug Development",date:"2021-08",pdf_filename:"quality-chemistry-manufacturing-nds-guidance.pdf",pdf_url:"https://www.canada.ca/content/dam/hc-sc/documents/services/drugs-health-products/drug-products/applications-submissions/guidance-documents/quality-chemistry-manufacturing/quality-chemistry-manufacturing-guidance-nds.pdf",page_url:"https://www.canada.ca/en/health-canada/services/drugs-health-products/drug-products/applications-submissions/guidance-documents/quality-chemistry-manufacturing.html",kw:["chemistry","manufacturing","quality","cmc","nds","canada","ands"]},
+  {agency:"HC",title:"Good Manufacturing Practices Guidelines — GUI-0001",type:"Guidance",topic:"GMP",date:"2020-03",pdf_filename:"gmp-guidelines-gui-0001.pdf",pdf_url:"https://www.canada.ca/content/dam/hc-sc/documents/services/drugs-health-products/compliance-enforcement/good-manufacturing-practices/guidance-documents/gmp-guidelines-0009/gmp-guidelines-0009.pdf",page_url:"https://www.canada.ca/en/health-canada/services/drugs-health-products/compliance-enforcement/good-manufacturing-practices/guidance-documents/gmp-guidelines-0009.html",kw:["gmp","manufacturing","canada","gui-0001","quality systems"]},
+  {agency:"HC",title:"Labelling of Pharmaceutical Drugs for Human Use — GUI-0075",type:"Guidance",topic:"Labeling",date:"2022-10",pdf_filename:"labelling-pharmaceutical-drugs-human-use-gui-0075.pdf",pdf_url:"https://www.canada.ca/content/dam/hc-sc/documents/services/drugs-health-products/drug-products/applications-submissions/guidance-documents/labelling-pharmaceutical-drugs-human-use/labelling-pharmaceutical-drugs-human-use.pdf",page_url:"https://www.canada.ca/en/health-canada/services/drugs-health-products/drug-products/applications-submissions/guidance-documents/labelling-pharmaceutical-drugs-human-use.html",kw:["labeling","labelling","canada","pharmaceutical","gui-0075","human use"]},
+  {agency:"HC",title:"Clinical Trial Applications: Quality, Safety and Efficacy — GUI-0100",type:"Guidance",topic:"Clinical Trials",date:"2019-05",pdf_filename:"clinical-trials-quality-safety-efficacy-gui-0100.pdf",pdf_url:"https://www.canada.ca/content/dam/hc-sc/documents/services/drugs-health-products/drug-products/applications-submissions/guidance-documents/clinical-trials/clinical-trials-guidance.pdf",page_url:"https://www.canada.ca/en/health-canada/services/drugs-health-products/drug-products/applications-submissions/guidance-documents/clinical-trials.html",kw:["clinical trials","canada","gui-0100","cta","safety","efficacy"]},
+  {agency:"HC",title:"Abbreviated New Drug Submissions and Bioequivalence Studies — GUI-0009",type:"Guidance",topic:"Bioequivalence",date:"2023-04",pdf_filename:"bioequivalence-ands-gui-0009.pdf",pdf_url:"https://www.canada.ca/content/dam/hc-sc/documents/services/drugs-health-products/drug-products/applications-submissions/guidance-documents/bioequivalence/conduct-analysis-comparative-bioavailability-studies.pdf",page_url:"https://www.canada.ca/en/health-canada/services/drugs-health-products/drug-products/applications-submissions/guidance-documents/bioequivalence.html",kw:["bioequivalence","ands","generic","canada","gui-0009","comparative bioavailability"]},
+  {agency:"HC",title:"Pharmacovigilance for Drug Manufacturers — GUI-0102",type:"Guidance",topic:"Pharmacovigilance",date:"2021-11",pdf_filename:"pharmacovigilance-drug-manufacturers-gui-0102.pdf",pdf_url:"https://www.canada.ca/content/dam/hc-sc/documents/services/drugs-health-products/drug-products/applications-submissions/guidance-documents/pharmacovigilance/pharmacovigilance-guidance.pdf",page_url:"https://www.canada.ca/en/health-canada/services/drugs-health-products/drug-products/applications-submissions/guidance-documents/pharmacovigilance.html",kw:["pharmacovigilance","safety reporting","adverse drug reactions","canada","gui-0102"]},
+  {agency:"HC",title:"Biosimilar Biologic Drugs: Guidance Document",type:"Guidance",topic:"Biosimilars",date:"2022-07",pdf_filename:"biosimilar-biologic-drugs-guidance-health-canada.pdf",pdf_url:"https://www.canada.ca/content/dam/hc-sc/documents/services/drugs-health-products/biologics-radiopharmaceuticals-genetic-therapies/applications-submissions/guidance-documents/biosimilar/biosimilar-biologic-drugs-guidance.pdf",page_url:"https://www.canada.ca/en/health-canada/services/drugs-health-products/biologics-radiopharmaceuticals-genetic-therapies/applications-submissions/guidance-documents/biosimilar.html",kw:["biosimilar","biologic","canada","sabb"]},
+  {agency:"HC",title:"Medical Devices Regulatory Framework — GUI-0016",type:"Guidance",topic:"Medical Devices",date:"2023-06",pdf_filename:"medical-devices-regulatory-framework-gui-0016.pdf",pdf_url:"https://www.canada.ca/content/dam/hc-sc/documents/services/drugs-health-products/medical-devices/application-information/guidance-documents/guidance-overview-medical-devices-regulations.pdf",page_url:"https://www.canada.ca/en/health-canada/services/drugs-health-products/medical-devices/application-information/guidance-documents.html",kw:["medical device","canada","mdr","gui-0016","class"]},
+  {agency:"HC",title:"Paediatric Drug Development: Guidance for Industry",type:"Guidance",topic:"Pediatric",date:"2020-12",pdf_filename:"paediatric-drug-development-guidance-health-canada.pdf",pdf_url:"https://www.canada.ca/content/dam/hc-sc/documents/services/drugs-health-products/drug-products/applications-submissions/guidance-documents/paediatric-drug-development/paediatric-drug-development.pdf",page_url:"https://www.canada.ca/en/health-canada/services/drugs-health-products/drug-products/applications-submissions/guidance-documents/pediatric.html",kw:["pediatric","paediatric","children","canada","age group"]},
+  {agency:"HC",title:"Post-Notice of Compliance (NOC) Changes: Quality Document",type:"Guidance",topic:"Drug Approval",date:"2020-04",pdf_filename:"post-noc-changes-quality-document.pdf",pdf_url:"https://www.canada.ca/content/dam/hc-sc/documents/services/drugs-health-products/drug-products/applications-submissions/guidance-documents/post-noc-changes-quality/post-noc-changes-quality-document.pdf",page_url:"https://www.canada.ca/en/health-canada/services/drugs-health-products/drug-products/applications-submissions/guidance-documents/post-noc-changes-quality.html",kw:["post-noc","noc changes","quality","canada","supplements","chemistry"]},
+  {agency:"HC",title:"Regulatory Requirements for Drug Identification Numbers (DINs)",type:"Guidance",topic:"Drug Submissions",date:"2021-03",pdf_filename:"regulatory-requirements-drug-identification-numbers-dins.pdf",pdf_url:"https://www.canada.ca/content/dam/hc-sc/documents/services/drugs-health-products/drug-products/applications-submissions/guidance-documents/din/regulatory-requirements-drug-identification-numbers.pdf",page_url:"https://www.canada.ca/en/health-canada/services/drugs-health-products/drug-products/applications-submissions/guidance-documents/din.html",kw:["din","drug identification number","canada","registration","market authorization"]},
+  {agency:"EMA",title:"ICH E6(R2): Guideline on Good Clinical Practice",type:"Guideline",topic:"Clinical Trials",date:"2016-07",pdf_filename:"ich-e6-r2-guideline-good-clinical-practice-step-5_en.pdf",pdf_url:"https://www.ema.europa.eu/en/documents/scientific-guideline/ich-e6-r2-guideline-good-clinical-practice-step-5_en.pdf",page_url:"https://www.ema.europa.eu/en/ich-e6-r2-guideline-good-clinical-practice",kw:["gcp","clinical trials","ich e6","good clinical practice","europe"]},
+  {agency:"EMA",title:"Guideline on Similar Biological Medicinal Products (Biosimilars)",type:"Guideline",topic:"Biosimilars",date:"2014-09",pdf_filename:"guideline-similar-biological-medicinal-products-rev1_en.pdf",pdf_url:"https://www.ema.europa.eu/en/documents/scientific-guideline/guideline-similar-biological-medicinal-products-rev1_en.pdf",page_url:"https://www.ema.europa.eu/en/similar-biological-medicinal-products",kw:["biosimilar","biologic","europe","similar biological"]},
+  {agency:"EMA",title:"GVP Module VI: Management and Reporting of Adverse Reactions",type:"Guideline",topic:"Pharmacovigilance",date:"2022-05",pdf_filename:"gvp-module-vi-rev-2_en.pdf",pdf_url:"https://www.ema.europa.eu/en/documents/regulatory-procedural-guideline/guideline-good-pharmacovigilance-practices-gvp-module-vi-rev-2_en.pdf",page_url:"https://www.ema.europa.eu/en/human-regulatory/post-authorisation/pharmacovigilance/good-pharmacovigilance-practices",kw:["pharmacovigilance","gvp","safety","europe","adverse events","eudravigilance","module vi"]},
+  {agency:"EMA",title:"Guideline on the Investigation of Bioequivalence",type:"Guideline",topic:"Bioequivalence",date:"2010-01",pdf_filename:"guideline-investigation-bioequivalence-rev1_en.pdf",pdf_url:"https://www.ema.europa.eu/en/documents/scientific-guideline/guideline-investigation-bioequivalence-rev1_en.pdf",page_url:"https://www.ema.europa.eu/en/investigation-bioequivalence",kw:["bioequivalence","europe","generic","pharmacokinetics","pk"]},
+  {agency:"EMA",title:"ICH Q8(R2): Pharmaceutical Development",type:"Guideline",topic:"Drug Development",date:"2009-10",pdf_filename:"ich-q8-r2-pharmaceutical-development_en.pdf",pdf_url:"https://www.ema.europa.eu/en/documents/scientific-guideline/ich-q8-r2-pharmaceutical-development_en.pdf",page_url:"https://www.ema.europa.eu/en/ich-q8-r2-pharmaceutical-development",kw:["ich q8","pharmaceutical development","qbd","quality by design"]},
+  {agency:"EMA",title:"ICH Q9(R1): Quality Risk Management",type:"Guideline",topic:"GMP",date:"2023-01",pdf_filename:"ich-q9-r1-quality-risk-management-step-5_en.pdf",pdf_url:"https://www.ema.europa.eu/en/documents/scientific-guideline/ich-q9-r1-quality-risk-management-step-5_en.pdf",page_url:"https://www.ema.europa.eu/en/ich-q9-quality-risk-management",kw:["quality risk management","ich q9","qrm","risk assessment","gmp"]},
+  {agency:"EMA",title:"Guideline on Summary of Product Characteristics (SmPC)",type:"Guideline",topic:"Labeling",date:"2022-11",pdf_filename:"guideline-summary-product-characteristics-smpc-rev2_en.pdf",pdf_url:"https://www.ema.europa.eu/en/documents/regulatory-procedural-guideline/guideline-summary-product-characteristics-rev2_en.pdf",page_url:"https://www.ema.europa.eu/en/human-regulatory/marketing-authorisation/labelling-packaging",kw:["labeling","labelling","europe","smpc","spc","summary product characteristics","package leaflet"]},
+  {agency:"EMA",title:"Guideline on Medicinal Products for Paediatric Use",type:"Guideline",topic:"Pediatric",date:"2017-08",pdf_filename:"guideline-medicinal-products-paediatric-use_en.pdf",pdf_url:"https://www.ema.europa.eu/en/documents/scientific-guideline/guideline-medicinal-products-paediatric-use_en.pdf",page_url:"https://www.ema.europa.eu/en/human-regulatory/research-development/paediatric-medicines",kw:["pediatric","paediatric","children","europe","pip"]},
+  {agency:"EMA",title:"Guideline on the Format of the Risk Management Plan (RMP)",type:"Guideline",topic:"Pharmacovigilance",date:"2022-03",pdf_filename:"guideline-format-risk-management-plan-rmp-eu-integrated-format_en.pdf",pdf_url:"https://www.ema.europa.eu/en/documents/regulatory-procedural-guideline/guideline-format-risk-management-plan-rmp-eu-integrated-format_en.pdf",page_url:"https://www.ema.europa.eu/en/documents/regulatory-procedural-guideline/guideline-format-risk-management-plan-rmp-eu-integrated-format_en.pdf",kw:["rmp","risk management plan","pharmacovigilance","europe","safety"]},
+  {agency:"EMA",title:"ICH M4: Common Technical Document (CTD) for Registration",type:"Guideline",topic:"Drug Approval",date:"2016-11",pdf_filename:"ich-m4-common-technical-document_en.pdf",pdf_url:"https://www.ema.europa.eu/en/documents/scientific-guideline/ich-m4-common-technical-document-registration-pharmaceuticals-human-use_en.pdf",page_url:"https://www.ema.europa.eu/en/ich-m4-common-technical-document-registration-pharmaceuticals-human-use",kw:["ctd","common technical document","ich m4","registration","drug approval","maa"]},
+  {agency:"EMA",title:"GVP Module I: Pharmacovigilance Systems and Quality Systems",type:"Guideline",topic:"Pharmacovigilance",date:"2021-09",pdf_filename:"gvp-module-i-rev-2_en.pdf",pdf_url:"https://www.ema.europa.eu/en/documents/regulatory-procedural-guideline/guideline-good-pharmacovigilance-practices-gvp-module-i-rev-2_en.pdf",page_url:"https://www.ema.europa.eu/en/human-regulatory/post-authorisation/pharmacovigilance/good-pharmacovigilance-practices",kw:["pharmacovigilance","gvp module i","psmf","quality system","europe"]},
+  {agency:"ICH",title:"ICH E8(R1): General Considerations for Clinical Studies",type:"ICH Guideline",topic:"Clinical Trials",date:"2021-10",pdf_filename:"ICH_E8-R1_Guideline_Step4_2021_1006.pdf",pdf_url:"https://database.ich.org/sites/default/files/ICH_E8%28R1%29_Guideline_Step4_2021_1006.pdf",page_url:"https://www.ich.org/page/efficacy-guidelines",kw:["ich e8","clinical studies","design","general considerations"]},
+  {agency:"ICH",title:"ICH Q10: Pharmaceutical Quality System",type:"ICH Guideline",topic:"GMP",date:"2008-06",pdf_filename:"ICH_Q10_Pharmaceutical_Quality_System.pdf",pdf_url:"https://database.ich.org/sites/default/files/Q10%20Guideline.pdf",page_url:"https://www.ich.org/page/quality-guidelines",kw:["ich q10","pharmaceutical quality system","gmp","quality","pqs"]},
+  {agency:"ICH",title:"ICH Q12: Pharmaceutical Product Lifecycle Management",type:"ICH Guideline",topic:"Drug Development",date:"2019-11",pdf_filename:"ICH_Q12_Guideline_Step4_2019_1119.pdf",pdf_url:"https://database.ich.org/sites/default/files/Q12_Guideline_Step4_2019_1119.pdf",page_url:"https://www.ich.org/page/quality-guidelines",kw:["ich q12","lifecycle","post-approval","regulatory","change management"]},
+  {agency:"ICH",title:"ICH E11(R1): Clinical Investigation in the Paediatric Population",type:"ICH Guideline",topic:"Pediatric",date:"2017-08",pdf_filename:"ICH_E11-R1_Addendum_Step4_2017_0721.pdf",pdf_url:"https://database.ich.org/sites/default/files/E11_R1_Addendum_Step4_2017_0721.pdf",page_url:"https://www.ich.org/page/efficacy-guidelines",kw:["ich e11","pediatric","paediatric","clinical investigation","children"]},
+  {agency:"ICH",title:"ICH Q1A(R2): Stability Testing of New Drug Substances and Products",type:"ICH Guideline",topic:"Stability",date:"2003-02",pdf_filename:"ICH_Q1A-R2_Guideline.pdf",pdf_url:"https://database.ich.org/sites/default/files/Q1A%28R2%29%20Guideline.pdf",page_url:"https://www.ich.org/page/quality-guidelines",kw:["stability","ich q1","drug substance","drug product","storage","shelf life"]},
+  {agency:"ICH",title:"ICH E9(R1): Statistical Principles — Estimands Addendum",type:"ICH Guideline",topic:"Clinical Trials",date:"2019-11",pdf_filename:"ICH_E9-R1_Step4_Guideline_2019_1203.pdf",pdf_url:"https://database.ich.org/sites/default/files/E9-R1_Step4_Guideline_2019_1203.pdf",page_url:"https://www.ich.org/page/efficacy-guidelines",kw:["ich e9","estimands","statistical","clinical trials","sensitivity analysis"]},
+  {agency:"WHO",title:"WHO TRS-1044 Annex 2: Good Manufacturing Practices for Pharmaceutical Products",type:"WHO Report",topic:"GMP",date:"2021-05",pdf_filename:"WHO-TRS-1044-annex2-gmp-pharmaceutical-products.pdf",pdf_url:"https://www.who.int/docs/default-source/medicines/norms-and-standards/guidelines/production/trs1044-annex2.pdf",page_url:"https://www.who.int/publications/i/item/WHO-TRS-1044",kw:["who","gmp","world health organization","manufacturing","pharmaceutical","trs-1044"]}
+];
+
+const AGM={FDA:{flag:"🇺🇸",full:"U.S. Food & Drug Administration",bc:"bf"},HC:{flag:"🇨🇦",full:"Health Canada",bc:"bh"},EMA:{flag:"🇪🇺",full:"European Medicines Agency",bc:"be"},ICH:{flag:"🌐",full:"Int'l Council for Harmonisation",bc:"bi"},WHO:{flag:"🌍",full:"World Health Organization",bc:"bw"}};
+const IC={pdf:`<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`,ext:`<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>`};
+
+function scoreDoc(d,q){
+  const ts=q.toLowerCase().split(/\s+/).filter(Boolean);
+  let s=0;
+  ts.forEach(t=>{
+    if(d.pdf_filename?.toLowerCase().includes(t))s+=14;
+    if(d.title.toLowerCase().includes(t))s+=10;
+    if(d.topic?.toLowerCase().includes(t))s+=6;
+    if(d.type?.toLowerCase().includes(t))s+=4;
+    d.kw?.forEach(k=>{if(k.includes(t))s+=3});
+  });
+  return s;
+}
+
+function localSearch(q,ags){
+  const hits=LOCAL.filter(d=>ags.includes(d.agency)).map(d=>({d,s:scoreDoc(d,q)})).filter(r=>r.s>0).sort((a,b)=>b.s-a.s).map(r=>r.d);
+  const g={};hits.forEach(d=>{(g[d.agency]=g[d.agency]||[]).push({...d,_local:true})});
+  return{groups:g,total:hits.length};
+}
+
+function hl(t,q){
+  if(!q||!t)return t||'';
+  const e=q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  return t.replace(new RegExp('('+e+')','gi'),'<mark>$1</mark>');
+}
+
+function card(d,q,i){
+  const m=AGM[d.agency]||{};
+  const pageHost=d.page_url?new URL(d.page_url).hostname.replace('www.',''):'';
+  const shortUrl=d.page_url?d.page_url.replace(/^https?:\/\//,'').replace(/\/$/,''):'';
+  return`<div class="dc" style="animation-delay:${i*.035}s">
+    <div class="df">${m.flag||'📄'}</div>
+    <div class="db">
+      <div class="dt">${hl(d.title,q)}${d._local?'<span class="dloc">cached</span>':'<span class="dai">✦ live</span>'}</div>
+      ${d.pdf_filename?`<div class="dfn">${IC.pdf} ${hl(d.pdf_filename,q)}</div>`:''}
+      <div class="dm">
+        <span class="dty">${d.type||'Guidance'}</span>
+        ${d.topic?`<span class="dtp">${d.topic}</span>`:''}
+        ${d.date?`<span class="dd">${d.date}</span>`:''}
+      </div>
+      ${d.page_url?`<div class="durl">
+        <span class="durl-label">URL</span>
+        <a class="durl-page" href="${d.page_url}" target="_blank" rel="noopener" title="${d.page_url}">${shortUrl}</a>
+        <button class="dcopy" onclick="event.preventDefault();navigator.clipboard.writeText('${d.page_url}').then(()=>{this.textContent='✓';setTimeout(()=>this.textContent='copy',1200)})" title="Copy URL">copy</button>
+      </div>`:''}
+    </div>
+    <div class="da">
+      ${d.page_url?`<a class="bp" href="${d.page_url}" target="_blank" rel="noopener">${IC.ext} Page</a>`:''}
+      ${d.pdf_url?`<a class="bpdf" href="${d.pdf_url}" target="_blank" rel="noopener">${IC.pdf} PDF</a>`:''}
+    </div>
+  </div>`;
+}
+
+function renderGroups(g,q,emptyMsg,banner){
+  const order=['FDA','HC','EMA','ICH','WHO'];
+  const total=Object.values(g).reduce((s,a)=>s+a.length,0);
+  let h=banner||'';
+  if(total===0){h+=`<div class="es"><div class="ei">🔍</div><p>${emptyMsg}</p></div>`;return h;}
+  order.forEach(ag=>{
+    const docs=g[ag];if(!docs?.length)return;
+    const m=AGM[ag];
+    h+=`<div class="ag"><div class="gh"><span class="gb ${m.bc}">${ag}</span><span class="gn">${m.full}</span><span class="gc">${docs.length} doc${docs.length!==1?'s':''}</span></div>${docs.map((d,i)=>card(d,q,i)).join('')}</div>`;
+  });
+  return h;
+}
+
+const ra=()=>document.getElementById('ra');
+function getAgs(){return[...document.querySelectorAll('.chip.on')].map(c=>c.dataset.a)}
+function setBtn(l){
+  const b=document.getElementById('sb');b.disabled=l;
+  b.innerHTML=l?`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation:spin .7s linear infinite"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Searching…`:`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Search`;
+}
+
+async function doSearch(){
+  const raw=document.getElementById('si').value.trim();if(!raw)return;
+  const ags=getAgs();if(!ags.length){alert('Select at least one agency.');return;}
+  setBtn(true);
+
+  // Step 1: Instant local results
+  const{groups:lg,total:lt}=localSearch(raw,ags);
+  ra().innerHTML=renderGroups(lg,raw,'No cached results — running live search…',
+    `<div class="bn loading"><div class="sp"></div><span>Found <strong>${lt}</strong> cached result${lt!==1?'s':''} instantly — searching live databases for more…</span></div>`);
+
+  // Step 2: live search
+  const sp=`You are a regulatory affairs expert assistant. Use web_search to find real guidance documents.
+TASK: Find guidance documents for the user query from these agencies ONLY: ${ags.join(', ')}
+Do NOT include these already-found documents: ${JSON.stringify(Object.values(lg).flat().map(d=>d.title))}
+
+CRITICAL OUTPUT RULE: Your ENTIRE final response must be ONE valid JSON object and nothing else.
+No introduction, no explanation, no markdown fences. Start with { and end with }.
+
+JSON shape:
+{
+  "FDA": [ { "agency":"FDA", "title":"exact title", "type":"Guidance|Draft Guidance|Guideline etc", "topic":"short topic", "date":"YYYY-MM", "pdf_filename":"filename.pdf or null", "pdf_url":"https://direct-link.pdf or null", "page_url":"https://official-page-url" } ],
+  "HC": [...],
+  "EMA": [...],
+  "ICH": [...],
+  "WHO": [...]
+}
+
+Rules:
+- Only include agency keys that have results
+- 2-5 real documents per agency max
+- page_url is required — must be a real URL from fda.gov, canada.ca, ema.europa.eu, ich.org, or who.int
+- pdf_url must end in .pdf — set null if unsure
+- Do NOT fabricate documents
+- YOUR ENTIRE RESPONSE = ONE JSON OBJECT, NOTHING ELSE`;
+
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:4000,system:sp,tools:[{type:'web_search_20250305',name:'web_search'}],messages:[{role:'user',content:`Query: "${raw}"\nAgencies: ${ags.join(', ')}`}]})});
+    if(!r.ok){const e=await r.text();throw new Error('API '+r.status+': '+e.slice(0,200));}
+    const data=await r.json();
+    // Collect ALL text blocks (web_search produces multiple content blocks)
+    const allText=(data.content||[])
+      .filter(b=>b.type==='text')
+      .map(b=>b.text)
+      .join('\n');
+    if(!allText.trim())throw new Error('no text in response');
+    // Strip markdown fences, then find outermost JSON object
+    let cleaned=allText.replace(/```json/gi,'').replace(/```/g,'').trim();
+    // Find the first { and last } to extract the JSON object
+    const s=cleaned.indexOf('{'),e=cleaned.lastIndexOf('}');
+    if(s<0||e<0||e<=s){
+      console.error('Raw response:',allText.slice(0,500));
+      throw new Error('No valid JSON object found in response');
+    }
+    let jsonStr=cleaned.slice(s,e+1);
+    let ai;
+    try{ai=JSON.parse(jsonStr);}
+    catch(parseErr){
+      // Try to salvage by removing trailing commas (common AI mistake)
+      jsonStr=jsonStr.replace(/,\s*([}\]])/g,'$1');
+      ai=JSON.parse(jsonStr);
+    }
+    const lt2=new Set(Object.values(lg).flat().map(d=>d.title.toLowerCase()));
+    const merged={...lg};
+    ags.forEach(ag=>{
+      const add=(ai[ag]||[]).filter(d=>!lt2.has(d.title?.toLowerCase())).map(d=>({...d,agency:ag}));
+      if(add.length)merged[ag]=[...(merged[ag]||[]),...add];
+    });
+    const mt=Object.values(merged).reduce((s,a)=>s+a.length,0);
+    const extra=mt-lt;
+    ra().innerHTML=renderGroups(merged,raw,'No documents found.',
+      `<div class="bn done">✓ ${mt} document${mt!==1?'s':''} total <span style="opacity:.7;font-weight:400;margin-left:4px">— ${lt} cached + ${extra} new from live search</span></div>`);
+  }catch(err){
+    console.error(err);
+    ra().innerHTML=renderGroups(lg,raw,'No cached results. Live search unavailable — try again.',
+      `<div class="bn partial">⚠ Showing ${lt} cached result${lt!==1?'s':''} — live search unavailable right now.</div>`);
+  }finally{setBtn(false);}
+}
+
+// Instant preview as user types
+let pt;
+document.getElementById('si').addEventListener('input',()=>{
+  clearTimeout(pt);pt=setTimeout(()=>{
+    const raw=document.getElementById('si').value.trim();
+    if(raw.length<2)return;
+    const{groups:g,total:t}=localSearch(raw,getAgs());
+    if(!t)return;
+    ra().innerHTML=renderGroups(g,raw,'',`<div class="bn partial" style="cursor:default">⚡ ${t} instant result${t!==1?'s':''} — press Enter or Search to also run live search</div>`);
+  },150);
+});
+
+function q(t){document.getElementById('si').value=t;doSearch();}
+document.getElementById('sb').addEventListener('click',doSearch);
+document.getElementById('si').addEventListener('keydown',e=>{if(e.key==='Enter')doSearch();});
+document.querySelectorAll('.chip').forEach(c=>c.addEventListener('click',()=>c.classList.toggle('on')));
+
+// Topics
+const TOPICS=[['GMP','GMP'],['Good Clinical Practice','Good Clinical Practice'],['Pharmacovigilance','Pharmacovigilance'],['Biosimilars','Biosimilars'],['Bioequivalence','Bioequivalence'],['Labeling','Labeling labelling'],['Drug Submissions','drug submission NDS ANDS'],['Medical Devices','medical device'],['Clinical Trials','clinical trial'],['Pediatric','pediatric paediatric'],['Risk Management Plan','risk management plan RMP'],['Stability','stability ICH Q1'],['Admin Processing','administrative processing DIN disinfectant'],['CTD','CTD common technical document'],['ICH Quality','ICH Q7 Q8 Q9 Q10 Q12'],['Drug Master File','drug master file DMF'],['IND','IND investigational new drug']];
+document.getElementById('tg').innerHTML=TOPICS.map(([l,t])=>`<span class="tt" onclick="q('${t.replace(/'/g,"\\'")}')">${l}</span>`).join('');
+
+function toggleDark(){
+  document.body.classList.toggle('dark');
+  localStorage.setItem('regsearch-dark', document.body.classList.contains('dark') ? '1' : '0');
+}
+if(localStorage.getItem('regsearch-dark')==='1') document.body.classList.add('dark');
+</script>
+
+<footer>
+  <div class="footer-inner">
+    <span>Built by</span>
+    <a href="https://www.linkedin.com/in/osmanmahad/" target="_blank" rel="noopener" class="footer-link">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+      Mahad Osman
+    </a>
+  </div>
+</footer>
+<style>
+footer{border-top:1.5px solid var(--border);margin-top:2rem;padding:1.25rem 2rem;transition:border-color .25s}
+.footer-inner{max-width:880px;margin:0 auto;display:flex;align-items:center;gap:.5rem;font-size:.8rem;color:var(--muted);font-family:'DM Sans',sans-serif}
+.footer-link{display:inline-flex;align-items:center;gap:.35rem;color:var(--accent);text-decoration:none;font-weight:500;transition:opacity .15s}
+.footer-link:hover{opacity:.75;text-decoration:underline}
+</style>
+</body>
+</html>
