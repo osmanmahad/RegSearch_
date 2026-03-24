@@ -1863,7 +1863,10 @@ Rules:
           });
           if (!r.ok) {
             const e = await r.text();
-            throw new Error("API " + r.status + ": " + e.slice(0, 200));
+            console.error("Worker response error:", r.status, e);
+            throw new Error(
+              "Worker returned " + r.status + ": " + e.slice(0, 150),
+            );
           }
           const data = await r.json();
           // Collect ALL text blocks (web_search produces multiple content blocks)
@@ -1914,11 +1917,13 @@ Rules:
             `<div class="bn done">✓ ${mt} document${mt !== 1 ? "s" : ""} total <span style="opacity:.7;font-weight:400;margin-left:4px">— ${lt} cached + ${extra} new from live search</span></div>`,
           );
         } catch (err) {
-          console.error(err);
+          console.error("Live search error:", err);
           const noKey = err.message === "NO_KEY";
+          const errDetail =
+            err.message && err.message !== "NO_KEY" ? ` (${err.message})` : "";
           const msg = noKey
             ? `<div class="bn partial">🔑 Proxy not configured. Open index.html and paste your Cloudflare Worker URL into the PROXY_URL variable at the top of the script. Showing ${lt} cached result${lt !== 1 ? "s" : ""} below.</div>`
-            : `<div class="bn partial">⚠ Showing ${lt} cached result${lt !== 1 ? "s" : ""} — live search unavailable right now.</div>`;
+            : `<div class="bn partial">⚠ Showing ${lt} cached result${lt !== 1 ? "s" : ""} — live search unavailable right now${errDetail}. <span style="font-weight:400;opacity:.8">Check browser console (F12 → Console) for details.</span></div>`;
           ra().innerHTML = renderGroups(lg, raw, "No cached results.", msg);
         } finally {
           setBtn(false);
@@ -1981,6 +1986,29 @@ Rules:
         ([l, t]) =>
           `<span class="tt" onclick="q('${t.replace(/'/g, "\\'")}')">${l}</span>`,
       ).join("");
+
+      async function testWorker() {
+        console.log("Testing Worker at:", PROXY_URL);
+        try {
+          const r = await fetch(PROXY_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              model: "claude-sonnet-4-20250514",
+              max_tokens: 10,
+              messages: [{ role: "user", content: "Hi" }],
+            }),
+          });
+          const text = await r.text();
+          console.log("Worker status:", r.status);
+          console.log("Worker response:", text.slice(0, 300));
+          alert("Worker status: " + r.status + "\n\n" + text.slice(0, 300));
+        } catch (e) {
+          console.error("Worker fetch failed:", e);
+          alert("Worker fetch failed: " + e.message);
+        }
+      }
+      // Type testWorker() in the browser console (F12) to diagnose issues
 
       function toggleDark() {
         document.body.classList.toggle("dark");
